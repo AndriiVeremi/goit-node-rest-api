@@ -1,4 +1,5 @@
 import express from "express";
+import { isEmpty } from "../middlewares/isEmpty.js";
 import {
   getAllContacts,
   getOneContact,
@@ -17,6 +18,6 @@ contactsRouter.delete("/:id", deleteContact);
 
 contactsRouter.post("/", createContact);
 
-contactsRouter.put("/:id", updateContact);
+contactsRouter.put("/:id", isEmpty, updateContact);
 
 export default contactsRouter;
