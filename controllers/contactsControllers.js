@@ -11,7 +11,7 @@ const getOneContact = async (req, res) => {
   const { id } = req.params;
   const result = await contactsService.getContactById(id);
   if (!result) {
-    throw HttpError(404, error.message);
+    throw HttpError(404);
   }
   res.json(result);
 };
@@ -25,7 +25,7 @@ const updateContact = async (req, res) => {
   const { id } = req.params;
   const result = await contactsService.updateContactById(id, req.body);
   if (!result) {
-    throw HttpError(404, error.message);
+    throw HttpError(404);
   }
   res.json(result);
 };
@@ -34,7 +34,7 @@ const deleteContact = async (req, res) => {
   const { id } = req.params;
   const result = await contactsService.removeContact(id);
   if (!result) {
-    throw HttpError(404, error.message);
+    throw HttpError(404);
   }
   res.json(result);
 };
