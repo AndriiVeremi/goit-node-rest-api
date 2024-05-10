@@ -2,10 +2,7 @@ import Contact from "../models/Contact.js";
 
 export const listContacts = () => Contact.find();
 
-export const getContactById = async (contactId) => {
-    const result = await Contact.findById(contactId)
-    return result
-};
+export const getContactById = (contactId) => Contact.findById(contactId)
 
 export const addContact = (data) => Contact.create(data);
 
