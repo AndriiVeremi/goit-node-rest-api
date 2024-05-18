@@ -1,6 +1,5 @@
-import bcript from "bcrypt";
+import bcrypt from "bcrypt";
 
-const compareHash = (password, hashPassword) =>
-  bcript.compare(password, hashPassword);
+const compareHash = (password, hashPassword) => bcrypt.compare(password, hashPassword);
 
 export default compareHash;

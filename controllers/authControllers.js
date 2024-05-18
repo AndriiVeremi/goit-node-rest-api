@@ -4,8 +4,7 @@ import ctrlWrapper from "../decorators/ctrlWrapper.js";
 import compareHash from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
 
-
-const signup = async (req, res) => {
+const register = async (req, res) => {
   const { email } = req.body;
   const user = await authServices.findUser({ email });
 
@@ -23,8 +22,7 @@ const signup = async (req, res) => {
   });
 };
 
-
-const signin = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await authServices.findUser({ email });
 
@@ -39,19 +37,24 @@ const signin = async (req, res) => {
   }
 
   const { _id: id } = user;
+
   const payload = {
     id,
   };
 
   const token = createToken(payload);
+  console.log("token::: ", token);
 
   res.json({
     token,
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+    },
   });
 };
 
-
 export default {
-  signup: ctrlWrapper(signup),
-  signin: ctrlWrapper(signin),
+  register: ctrlWrapper(register),
+  login: ctrlWrapper(login),
 };
