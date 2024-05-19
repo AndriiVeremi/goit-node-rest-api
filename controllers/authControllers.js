@@ -43,7 +43,7 @@ const login = async (req, res) => {
   };
 
   const token = createToken(payload);
-  console.log("token::: ", token);
+  await authServices.updateUser({ _id: id }, { token });
 
   res.json({
     token,
@@ -54,7 +54,26 @@ const login = async (req, res) => {
   });
 };
 
+const current = (req, res) => {
+  const { email, subscription } = req.user;
+  res.json({
+    email,
+    subscription,
+  });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await authServices.updateUser({ _id }, { token: "" });
+
+  res.status(204).json({
+    message: "No Content",
+  });
+};
+
 export default {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
+  logout: ctrlWrapper(logout),
+  current: ctrlWrapper(current),
 };
