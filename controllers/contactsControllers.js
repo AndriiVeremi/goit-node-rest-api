@@ -5,8 +5,20 @@ import ctrlWrapper from "../decorators/ctrlWrapper.js";
 const getAllContacts = async (req, res) => {
   const { _id: owner } = req.user;
   const filter = { owner };
-  const result = await contactsService.listContacts({ filter });
-  res.json(result);
+  const fields = "-createdAt -updatedAt"
+  const { page = 1, limit = 20 } = req.query;
+  const skip = (page - 1) * limit;
+  const settings = { skip, limit };
+  const result = await contactsService.listContacts({
+    filter,
+    fields,
+    settings
+  });
+  const total = await contactsService.countAllContacts(filter);
+  res.json({
+    total,
+    result,
+  });
 };
 
 const getOneContact = async (req, res) => {
