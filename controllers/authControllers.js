@@ -8,7 +8,6 @@ import compareHash from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
 import jimpAvatar from "../helpers/jimpAvatar.js";
 
-
 const postersPath = path.resolve("public", "avatars");
 
 const register = async (req, res) => {
