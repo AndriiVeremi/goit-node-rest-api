@@ -52,6 +52,7 @@ authRouter.get(
 
 authRouter.post(
   "/verify",
+  isEmpty,
   validateBody(emailSchema),
   authControllers.resendVerifyEmail
 );
