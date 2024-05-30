@@ -47,10 +47,12 @@ authRouter.patch(
 
 authRouter.get(
   "/verify/:verificationToken",
-  authControllers.verifyEmail);
+  authControllers.verifyEmail
+);
 
 authRouter.post(
   "/verify",
+  isEmpty,
   validateBody(emailSchema),
   authControllers.resendVerifyEmail
 );

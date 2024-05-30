@@ -2,20 +2,20 @@ import fs from "fs/promises";
 import path from "path";
 import gravatar from "gravatar";
 import * as authServices from "../services/authServices.js";
-import HttpError from "../helpers/HttpError.js";
 import ctrlWrapper from "../decorators/ctrlWrapper.js";
+import HttpError from "../helpers/HttpError.js";
 import compareHash from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
 import jimpAvatar from "../helpers/jimpAvatar.js";
+import sendEmail from "../helpers/sendEmail.js";
 import { nanoid } from "nanoid";
 
-const { BASE_URL } = process.env;
 const postersPath = path.resolve("public", "avatars");
+const { BASE_URL } = process.env;
 
 const register = async (req, res) => {
   const { email } = req.body;
   const user = await authServices.findUser({ email });
-
   if (user) {
     throw HttpError(409, "Email in use");
   }
@@ -31,8 +31,9 @@ const register = async (req, res) => {
   const verifyEmail = {
     to: email,
     subject: "Verify email",
-    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${verificationToken}">Click verify email</a> `,
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click verify email</a> `,
   };
+
   await sendEmail(verifyEmail);
 
   res.status(201).json({
@@ -41,6 +42,47 @@ const register = async (req, res) => {
       subscription: newUser.subscription,
     },
   });
+};
+
+const verifyEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+  const user = await authServices.findUser({ verificationToken });
+
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+
+  await authServices.updateUser(
+    { _id: user._id },
+    {
+      verify: true,
+      verificationToken: " ",
+    }
+  );
+  res.json({ message: "Verification successful" });
+};
+
+const resendVerifyEmail = async (req, res) => {
+  const { email } = req.body;
+  const user = await authServices.findUser({ email });
+
+  if (!user) {
+    throw HttpError(400, "missing required field email");
+  }
+
+  if (user.verify) {
+    throw HttpError(400, "Verification has already been passed");
+  }
+
+  const verifyEmail = {
+    to: email,
+    subject: "Verify email",
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verificationToken}">Click verify email</a> `,
+  };
+
+  await sendEmail(verifyEmail);
+
+  res.json({ message: "Verification email sent" });
 };
 
 const login = async (req, res) => {
@@ -55,6 +97,10 @@ const login = async (req, res) => {
 
   if (!comparePassword) {
     throw HttpError(401, "Email or password is wrong");
+  }
+
+  if (!user.verify) {
+    throw HttpError(401, "Email not verified");
   }
 
   const { _id: id } = user;
@@ -110,38 +156,6 @@ const updateAvatar = async (req, res) => {
   res.status(200).json({
     avatarUrl,
   });
-};
-
-const verifyEmail = async (req, res) => {
-  const { verificationToken } = req.params;
-  const user = await authServices.findUser({ verificationToken });
-  if (!user) {
-    throw HttpError(404, "User not found");
-  }
-  await authServices.findByIdAndUpdate(user._id, {
-    verify: true,
-    verificationToken: "",
-  });
-  res.json({ message: "Verification successful" });
-};
-
-const resendVerifyEmail = async (req, res) => {
-  const { email } = req.body;
-  const user = await authServices.findUser(email);
-  if (!user) {
-    throw HttpError(400, "missing required field email");
-  }
-  if (user.verify) {
-    throw HttpError(400, "Verification has already been passed");
-  }
-  const verifyEmail = {
-    to: email,
-    subject: "Verify email",
-    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verificationToken}">Click verify email</a> `,
-  };
-  await sendEmail(verifyEmail);
-
-  res.json({ message: "Verification email sent" });
 };
 
 export default {
