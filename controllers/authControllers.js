@@ -7,21 +7,25 @@ import ctrlWrapper from "../decorators/ctrlWrapper.js";
 import compareHash from "../helpers/compareHash.js";
 import { createToken } from "../helpers/jwt.js";
 import jimpAvatar from "../helpers/jimpAvatar.js";
+import sendEmail from "../helpers/sendEmail.js";
 import { nanoid } from "nanoid";
 
 const { BASE_URL } = process.env;
 const postersPath = path.resolve("public", "avatars");
 
 const register = async (req, res) => {
-  const { email } = req.body;
-  const user = await authServices.findUser({ email });
 
+  const { email } = req.body;
+
+  const user = await authServices.findUser({ email });
   if (user) {
     throw HttpError(409, "Email in use");
   }
 
   const avatarUrl = gravatar.url(email);
+
   const verificationToken = nanoid();
+
   const newUser = await authServices.saveUser({
     ...req.body,
     avatarUrl,
@@ -33,6 +37,7 @@ const register = async (req, res) => {
     subject: "Verify email",
     html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click verify email</a> `,
   };
+
   await sendEmail(verifyEmail);
 
   res.status(201).json({
