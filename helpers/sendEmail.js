@@ -1,19 +1,26 @@
-import sgMail from "@sendgrid/mail";
+import nodemailer from "nodemailer";
 import "dotenv/config";
 
-const { SENDGRID_API_KEY } = process.env;
+const { UKR_NET_PASSWORD, UKR_NET_FROM } = process.env;
 
-sgMail.setApiKey(SENDGRID_API_KEY);
+const nodemailerConfig = {
+  host: "smtp.ukr.net",
+  port: 465,
+  secure: true,
+  auth: {
+    user: UKR_NET_FROM,
+    pass: UKR_NET_PASSWORD,
+  },
+};
+
+const transport = nodemailer.createTransport(nodemailerConfig);
 
 const sendEmail = async (data) => {
-  const email = { ...data, from: "dashuk10@gmail.com" };
-  await sgMail.send(email);
-  return true;
+  const email = { ...data, from: UKR_NET_FROM };
+ return transport.sendMail(email);
 };
 
 export default sendEmail;
-
-
 
 
 
