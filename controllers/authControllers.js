@@ -10,15 +10,12 @@ import jimpAvatar from "../helpers/jimpAvatar.js";
 import sendEmail from "../helpers/sendEmail.js";
 import { nanoid } from "nanoid";
 
-const { BASE_URL } = process.env;
 const postersPath = path.resolve("public", "avatars");
+const { BASE_URL } = process.env;
 
 const register = async (req, res) => {
-
   const { email } = req.body;
-
   const user = await authServices.findUser({ email });
-
   if (user) {
     throw HttpError(409, "Email in use");
   }
@@ -36,7 +33,7 @@ const register = async (req, res) => {
     subject: "Verify email",
     html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click verify email</a> `,
   };
-    
+
   await sendEmail(verifyEmail);
 
   res.status(201).json({
@@ -49,20 +46,19 @@ const register = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   const { verificationToken } = req.params;
-  console.log('verificationToken::: ', verificationToken);
-  
-
   const user = await authServices.findUser({ verificationToken });
-  console.log('user::: ', user);
 
   if (!user) {
     throw HttpError(404, "User not found");
   }
 
-  await authServices.updateUser({_id: user._id}, {
-    verify: true,
-    verificationToken: null,
-  });
+  await authServices.updateUser(
+    { _id: user._id },
+    {
+      verify: true,
+      verificationToken: " ",
+    }
+  );
   res.json({ message: "Verification successful" });
 };
 
